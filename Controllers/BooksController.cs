@@ -1,5 +1,6 @@
 ﻿using bookDemo.Data;
 using bookDemo.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace bookDemo.Controllers
@@ -94,6 +95,27 @@ namespace bookDemo.Controllers
                     }); // 404
 
                 ApplicationContext.Books.Remove(bookToDelete);
+                return NoContent(); // 204
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message); // 400
+            }
+        }
+        [HttpPatch("{id:int}")]
+        public IActionResult PartiallyUpdateOneBook([FromRoute(Name = "id")] int id, [FromBody] JsonPatchDocument<Book> bookPatch)
+        {
+            try
+            {
+                if (bookPatch is null)
+                    return BadRequest(); // 400
+
+                var bookToUpdate = ApplicationContext.Books.Where(b => b.Id.Equals(id)).SingleOrDefault();
+
+                if (bookToUpdate is null)
+                    return NotFound(); // 404
+
+                bookPatch.ApplyTo(bookToUpdate);
                 return NoContent(); // 204
             }
             catch (Exception exception)
