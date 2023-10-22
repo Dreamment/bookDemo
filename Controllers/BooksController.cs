@@ -12,7 +12,7 @@ namespace bookDemo.Controllers
         public IActionResult GetAllBooks()
         {
             var books = ApplicationContext.Books;
-            return Ok(books);
+            return Ok(books); // 200
 
         }
         [HttpGet("{id:int}")]
@@ -21,9 +21,9 @@ namespace bookDemo.Controllers
             var book = ApplicationContext.Books.Where(b => b.Id.Equals(id)).SingleOrDefault();
 
             if (book is null)
-                return NotFound();
+                return NotFound(); // 404
 
-            return Ok(book);
+            return Ok(book); // 200
 
         }
         [HttpPost]
@@ -35,11 +35,11 @@ namespace bookDemo.Controllers
                     return BadRequest(); // 400
 
                 ApplicationContext.Books.Add(book);
-                return StatusCode(201, book);
+                return StatusCode(201, book); // 201
             }
             catch (Exception exception)
             {
-                return BadRequest(exception.Message);
+                return BadRequest(exception.Message); // 400
             }
         }
         [HttpPut("{id:int}")]
@@ -60,6 +60,41 @@ namespace bookDemo.Controllers
                 bookToUpdate.Price = book.Price;
 
                 return Ok(bookToUpdate); // 200
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message); // 400
+            }
+        }
+        [HttpDelete]
+        public IActionResult DeleteAllBooks()
+        {
+            try
+            {
+                ApplicationContext.Books.Clear();
+                return NoContent(); // 204
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message); // 400
+            }
+        }
+        [HttpDelete("{id:int}")]
+        public IActionResult DeleteOneBook([FromRoute(Name = "id")] int id)
+        {
+            try
+            {
+                var bookToDelete = ApplicationContext.Books.Where(b => b.Id.Equals(id)).SingleOrDefault();
+
+                if (bookToDelete is null)
+                    return NotFound(new
+                    {
+                        statusCode = 404,
+                        message = $"Book with id {id} not found"
+                    }); // 404
+
+                ApplicationContext.Books.Remove(bookToDelete);
+                return NoContent(); // 204
             }
             catch (Exception exception)
             {
