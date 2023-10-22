@@ -42,5 +42,29 @@ namespace bookDemo.Controllers
                 return BadRequest(exception.Message);
             }
         }
+        [HttpPut("{id:int}")]
+        public IActionResult UpdateOneBook([FromRoute(Name = "id")] int id, [FromBody] Book book)
+        {
+            try
+            {
+                if (book is null)
+                    return BadRequest(); // 400
+
+                var bookToUpdate = ApplicationContext.Books.Where(b => b.Id.Equals(id)).SingleOrDefault();
+
+                if (bookToUpdate is null)
+                    return NotFound(); // 404
+
+                bookToUpdate.Id = book.Id;
+                bookToUpdate.Title = book.Title;
+                bookToUpdate.Price = book.Price;
+
+                return Ok(bookToUpdate); // 200
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message); // 400
+            }
+        }
     }
 }
